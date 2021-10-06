@@ -50,7 +50,8 @@ def phase_automata(driving_symbol='0',number_of_symbols=3,id_of_starting_symbol=
 
 
 def usePhaseMachine():
-    threeChannels, end_channel = phase_automata(driving_symbol="1",probability_of_transition=True)
+    driving_symbol = "0"
+    threeChannels, end_channel = phase_automata(driving_symbol=driving_symbol,probability_of_transition=False)
     print(threeChannels)
     tC = threeChannels.transpose((1,0))
     simt = 0.000001#0.000000008
@@ -107,7 +108,7 @@ def usePhaseMachine():
     # Plot the decoded output of the ensemble
     plt.figure(figsize=(8, 4))
     plt.subplot(121)
-    plt.title("Input Signals")
+    plt.title("Input Signals, Driving symbol "+ str(driving_symbol))
     plt.ylabel("signal (Input 3 phase signal)")
     plt.xlabel("Time (s)")
 
@@ -123,7 +124,7 @@ def usePhaseMachine():
     #plt.plot(sim.trange(), (sim.data[filtered])*10000)
     plt.xlim(0, simt)
 
-    plt.savefig("fig/input_signals.png")
+    plt.savefig("fig/input_signals_driving_symbol"+driving_symbol+".png")
     plt.clf()
     # Plot the spiking output of the ensemble
     plt.figure(figsize=(8, 4))
@@ -144,13 +145,5 @@ def usePhaseMachine():
     # plt.show()
     return 0
 
-
-
 # phase_automata()
-
-# str_of_events = timeseries_to_events(info="0", starting_symbol=0, timesteps=9, number_of_symbols=3,
-#                                      probability_of_transition=False,save_path_and_name="",time_to_save_at = 1)
-# 
-# print(str_of_events)
-
 usePhaseMachine()
