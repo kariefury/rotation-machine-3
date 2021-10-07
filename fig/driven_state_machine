@@ -1,0 +1,14 @@
+digraph {
+	0 [label=A shape=circle]
+	1 [label=B shape=circle]
+	2 [label=C shape=circle]
+	0 -> 1 [label="x = 1"]
+	1 -> 2 [label="x = 1"]
+	2 -> 0 [label="x = 1"]
+	0 -> 2 [label="x = 0"]
+	2 -> 1 [label="x = 0"]
+	1 -> 0 [label="x = 0"]
+	1 -> 1 [label="p = 0.2"]
+	2 -> 2 [label="p = 0.2"]
+	0 -> 0 [label="p = 0.2"]
+}
