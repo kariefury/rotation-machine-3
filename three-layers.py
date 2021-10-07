@@ -105,7 +105,7 @@ with model:
 
 with model:
     nengo.Connection(input_signal, neurons, synapse=None)
-    nengo.Connection(neurons, neuronsL2, synapse=None)
+    nengo.Connection(neurons, neuronsL2, synapse=2e-8)
     nengo.Connection(neuronsL2,neuronsL3,synapse=None)
 
 
