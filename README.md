@@ -11,5 +11,7 @@ When the three pulse channels are used as inputs into a LIF neuron, the neuron p
 
 The spike events are shown in blue on the left and the subthreshold neuron voltage on the right in red.
 
+## Examples of Layers and Networks
+1. [3 Layer network](https://github.com/kariefury/rotation-machine-3/blob/main/Readme_three_layers.md)
 
 
