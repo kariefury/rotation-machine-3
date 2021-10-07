@@ -91,7 +91,12 @@ with model:
             # neurons.
             max_rates=Uniform(500e+6, 500e+6),  # Set the maximum firing rate of the neuron 500Mhz
             # Set the neuron's firing rate to increase for 2 combinations of 3 channel input.
-            encoders=[[1, -1, -1], [-1, -1, 1]],
+            #encoders=[[1, -1, -1], [-1, -1, 1]],
+            #encoders=[[1, -1, -1], [-1, 1, -1]],
+            #encoders=[[1, -1, 1], [-1, 1, 1]],
+            #encoders=[[1, -1, -1], [1, -1, -1]],
+            #encoders=[[1, 1, 1], [-1, -1, -1]],
+            encoders=[[-1, -1, 1], [1, -1, -1]],
         )
 
 driving_symbol = "0"
@@ -105,7 +110,7 @@ with model:
 
 with model:
     nengo.Connection(input_signal, neurons, synapse=None)
-    nengo.Connection(neurons, neuronsL2, synapse=2e-8)
+    nengo.Connection(neurons, neuronsL2, synapse=None)
     nengo.Connection(neuronsL2,neuronsL3,synapse=None)
 
 
@@ -116,10 +121,10 @@ with model:
     #voltage = nengo.Probe(neurons.neurons, 'voltage')
     voltageL3 = nengo.Probe(neuronsL3.neurons, 'voltage')
     # Spikes filtered by a 10ms post-synaptic filter
-    filteredL3 = nengo.Probe(neuronsL3, synapse=1e-8)
+    filteredL3 = nengo.Probe(neuronsL3, synapse=1e-7)
     
 with nengo.Simulator(model, dt=1e-8) as sim:  # Create a simulator
-    sim.run(1000000e-9)  # Run it for 10k nanosecond
+    sim.run(10000e-9)  # Run it for 10k nanosecond
     
 t = sim.trange()
 
