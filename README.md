@@ -5,7 +5,7 @@ The following experiment describes a spiking neural network for studying the out
 
 The state machine can be represented as a 3 x 3 matrix of transition probabilities, where the probability of transition **p** represents how unlikely it is for the machine to remain in the same state for two measurement periods. **p** is a positive number between 0 - 1.
 
-With a driving symbol of 1 binary input (x) into the 3 state (A,B,C) when x = 0, p = 0 it randomly walks C,B,A. If **p** is non-zero and positive it will randomly walk C, C, C, B, B, A, A, C ... where the number of times it occurs in the same state represented by no spikes on the 3 output channels (represented as the edges where x = 0 or 1).
+With a driving symbol of 1 binary input (x) into the 3 state (A,B,C) when x = 0, p = 0 it walks A,C,B. If **p** is non-zero and positive it will randomly walk A,C, C, C, B, B, A, A, C ... where the number of times it occurs in the same state represented by no spikes on the 3 output channels (represented as the edges where x = 0 or 1).
 
 The function that implements the driven state machine is called `phase_automata()` and its source code can be found [here](https://github.com/kariefury/rotation-machine-3/blob/main/three-phase-rotation-machine.py).
 ```
@@ -16,7 +16,7 @@ phase_automata(driving_symbol='0', # Corresponds to x = 0, x = 1
                 probability_of_transition=False #Causes p to be non-zero and positive, since it uses a random number, causes non-deterministic behaviror for simulation.)
 ```
                 
-The output of `phase_automata()` is a matrix number_of_symbols x timesteps.
+The output of `phase_automata()` is a matrix number_of_symbols x timesteps, where 1 represents a spike and a non-spike is represented by a 0. It can also be rewritten for 1 to represent a spike and a -1 for non-spike.
 
 Then it is fed into the Nengo neuron simulation using the Nengo function `PresentInput()`.
 When x = 0 it randomly walks A,C,B.
