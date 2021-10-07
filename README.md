@@ -34,6 +34,6 @@ The spike events are shown in blue on the left and the subthreshold neuron volta
 ## Examples of Layers and Networks
 1. **2 Neurons** 2 Neurons in an ensemble, used to produce plots of 2 neurons
 2. **2 Layer network** 2 Layers connected feedforward
-3. **[3 Layer network]**(https://github.com/kariefury/rotation-machine-3/blob/main/Readme_three_layers.md)
+3. **[3 Layer network](https://github.com/kariefury/rotation-machine-3/blob/main/Readme_three_layers.md)** 3 Layers connected feedforward. 12 neurons total.
 
 
