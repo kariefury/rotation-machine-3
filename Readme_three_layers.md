@@ -17,3 +17,8 @@ Finally, connect the outputs of the 6 neurons to Layer 3 consisting of 2 neurons
 ![Image of 2 neurons, driving symbol 0](https://github.com/kariefury/rotation-machine-3/blob/main/fig/three_layers0.png)
 
 ![Image of 2 neurons, driving symbol 1](https://github.com/kariefury/rotation-machine-3/blob/main/fig/three_layers1.png)
+
+Probing the neurons with a synapse filter results in:
+![Image of filter](https://github.com/kariefury/rotation-machine-3/blob/main/fig/three_layers_filtered0.png)
+![Image of filter](https://github.com/kariefury/rotation-machine-3/blob/main/fig/three_layers_filtered1.png)
+
