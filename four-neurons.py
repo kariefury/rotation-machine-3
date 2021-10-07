@@ -62,7 +62,7 @@ with model:
             encoders=[[-1, -1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, -1]],
         )
 
-threeChannels, end_channel = phase_automata(driving_symbol="0", probability_of_transition=False)
+threeChannels, end_channel = phase_automata(driving_symbol="1", probability_of_transition=False)
 print(threeChannels)
 tC = threeChannels.transpose((1, 0))
 
@@ -79,7 +79,7 @@ with model:
     # Subthreshold soma voltages of the neurons
     voltage = nengo.Probe(neurons.neurons, 'voltage')
     # Spikes filtered by a 10ms post-synaptic filter
-    filtered = nengo.Probe(neurons, synapse=1e-11)
+    filtered = nengo.Probe(neurons, synapse=1e-5)
     
 with nengo.Simulator(model, dt=1e-8) as sim:  # Create a simulator
     sim.run(1000000e-9)  # Run it for 10k nanosecond
@@ -108,7 +108,7 @@ plt.title("Neuron Spikes")
 plt.subplot(1, 2, 1)
 plt.xlabel("Time (s)")
 rasterplot(t[0:plot_range], sim.data[spikes][0:plot_range], colors=['g', 'b', 'r', 'k'])
-plt.yticks((1,2,3,4), ("Channel 0 neuron","Channel 1 neuron" ,"Channel 2 neuron","Off neuron"))
+plt.yticks((1,2,3,4), ("C0 neuron","C1 neuron" ,"C2 neuron","Off neuron"))
 plt.ylim(4.5, 0.5)
 
 # Plot the soma voltages of the neurons
