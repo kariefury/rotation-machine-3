@@ -97,7 +97,7 @@ with model:
     #voltage = nengo.Probe(neurons.neurons, 'voltage')
     voltageL2 = nengo.Probe(neuronsL2.neurons, 'voltage')
     # Spikes filtered by a 10ms post-synaptic filter
-    filteredL2 = nengo.Probe(neuronsL2, synapse=1e-11)
+    filteredL2 = nengo.Probe(neuronsL2, synapse=1e-8)
     
 with nengo.Simulator(model, dt=1e-8) as sim:  # Create a simulator
     sim.run(1000000e-9)  # Run it for 10k nanosecond
