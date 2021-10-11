@@ -70,9 +70,9 @@ with model:
     input_signal = nengo.Node(PresentInput(tC, presentation_time=1e-7))
 
 with model:
-    nengo.Connection(input_signal, neurons, synapse=0)
+    nengo.Connection(input_signal, neurons, synapse=1e-2)
 
-fname = "input_signal_synapse_0"
+fname = "input_signal_synapse_1e-2"
 
 with model:
     input_probe = nengo.Probe(input_signal)  # The original input
