@@ -49,15 +49,14 @@ with model:
         neurons = nengo.Ensemble(
             2,  # Number of neurons
             dimensions=3,  # each neuron is connected to all (3) input channels.
-            # Set intercept to 0.5
-            intercepts=Uniform(-1e-5, 1e-5),  # Set the intercepts at 0.00001 (threshold for Soma voltage)
-            neuron_type=nengo.LIF(min_voltage=0, tau_ref=5e-11, tau_rc=2e-8),  # Specify type of neuron
+            intercepts=Uniform(-1e-1, 1e-1),  # Set the intercepts at 0.00001 (threshold for Soma voltage)
+            neuron_type=nengo.LIF(min_voltage=0, tau_ref=2e-11, tau_rc=2e-8),  # Specify type of neuron
             # Set tau_ref= or tau_rc = here to
             # change those
             # parms
             # for the
             # neurons.
-            max_rates=Uniform(2e+9, 2e+9),             # Set the maximum firing rate of the neuron 500Mhz
+            max_rates=Uniform(2e+9, 2e+9),             # Set the maximum firing rate of the neuron 2Ghz
             # Set the neuron's firing rate to increase for 2 combinations of 3 channel input.
             encoders=[[-1, -1, 1], [1, -1, -1]],
         )
@@ -70,9 +69,9 @@ with model:
     input_signal = nengo.Node(PresentInput(tC, presentation_time=1e-7))
 
 with model:
-    nengo.Connection(input_signal, neurons, synapse=1e-5)
+    nengo.Connection(input_signal, neurons, synapse=None)
 
-fname = "input_signal_synapse_1e-5"
+fname = "input_signal_synapse_None_intercepts_-1e-1-1e-01_maxrate2e+9_tau_ref2e-11_tau_rc=2e-8"
 
 with model:
     input_probe = nengo.Probe(input_signal)  # The original input
@@ -84,6 +83,7 @@ with model:
     
 with nengo.Simulator(model, dt=1e-8) as sim:  # Create a simulator
     sim.run(10000e-9)  # Run it for 10k nanosecond
+    print(neurons.intercepts)
     
 t = sim.trange()
 
