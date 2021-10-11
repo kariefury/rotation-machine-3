@@ -50,19 +50,19 @@ with model:
             2,  # Number of neurons
             dimensions=3,  # each neuron is connected to all (3) input channels.
             # Set intercept to 0.5
-            intercepts=Uniform(-0.00001, 0.00001),  # Set the intercepts at 0.00001 (threshold for Soma voltage)
-            neuron_type=nengo.LIF(min_voltage=0, tau_ref=0.0000000005, tau_rc=0.00000001),  # Specify type of neuron
+            intercepts=Uniform(-1e-5, 1e-5),  # Set the intercepts at 0.00001 (threshold for Soma voltage)
+            neuron_type=nengo.LIF(min_voltage=0, tau_ref=5e-11, tau_rc=2e-8),  # Specify type of neuron
             # Set tau_ref= or tau_rc = here to
             # change those
             # parms
             # for the
             # neurons.
-            max_rates=Uniform(500e+6, 500e+6),             # Set the maximum firing rate of the neuron 500Mhz
+            max_rates=Uniform(2e+9, 2e+9),             # Set the maximum firing rate of the neuron 500Mhz
             # Set the neuron's firing rate to increase for 2 combinations of 3 channel input.
             encoders=[[-1, -1, 1], [1, -1, -1]],
         )
 
-threeChannels, end_channel = phase_automata(driving_symbol="1", probability_of_transition=True)
+threeChannels, end_channel = phase_automata(driving_symbol="1", probability_of_transition=False)
 print(threeChannels)
 tC = threeChannels.transpose((1, 0))
 
@@ -70,8 +70,9 @@ with model:
     input_signal = nengo.Node(PresentInput(tC, presentation_time=1e-7))
 
 with model:
-    nengo.Connection(input_signal, neurons, synapse=1) 
+    nengo.Connection(input_signal, neurons, synapse=1)
 
+fname = "input_signal_synapse_1"
 
 with model:
     input_probe = nengo.Probe(input_signal)  # The original input
@@ -93,14 +94,14 @@ plt.plot(t, sim.data[input_probe])
 plt.xlim(0, t[plot_range])
 plt.xlabel("Time (s)")
 plt.title("Input probe for " + str(plot_range) + " timesteps")
-plt.savefig("fig/two_neurons_input_probe.png")
+plt.savefig("fig/two_neurons_input_probe"+fname+".png")
 plt.clf()
 plt.figure()
 plt.title("Neurons filtered probe for " + str(plot_range) + " timesteps")
 plt.plot(t, sim.data[filtered])
 plt.xlabel("Time (s)")
 plt.xlim(0, t[plot_range])
-plt.savefig("fig/two_neurons_filtered.png")
+plt.savefig("fig/two_neurons_filtered"+fname+".png")
 
 # Plot the spiking output of the ensemble
 plt.figure(figsize=(10, 4))
@@ -119,4 +120,4 @@ plt.plot(t, sim.data[voltage][:, 1], 'k')
 plt.xlabel("Time (s)")
 plt.yticks(())
 plt.subplots_adjust(wspace=0.05)
-plt.savefig("fig/two_neurons.png")
+plt.savefig("fig/two_neurons"+fname+".png")
