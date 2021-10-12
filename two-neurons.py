@@ -58,7 +58,7 @@ with model:
             # neurons.
             max_rates=Uniform(2e+9, 2e+9),             # Set the maximum firing rate of the neuron 2Ghz
             # Set the neuron's firing rate to increase for 2 combinations of 3 channel input.
-            encoders=[[-1, 1, 1], [1, -1, -1]],
+            encoders=[[-1, -1, 1], [1, -1, -1]]#[[1, 1, 1], [1, -1, -1]],
         )
 
 threeChannels, end_channel = phase_automata(driving_symbol="1", probability_of_transition=False)
@@ -71,8 +71,9 @@ with model:
 with model:
     nengo.Connection(input_signal, neurons, synapse=None)
 
-fname = "input_signal_synapse_None_intercepts_-1e-1-1e-01_maxrate2e+9_tau_ref2e-11_tau_rc=2e-8_encoder_-1_1_1__1_" \
-        "-1_-1"
+fname = "input_signal_synapse_None_intercepts_-1e-1-1e-01_maxrate2e+9_tau_ref2e-11_tau_rc=2e-8_min_voltage_0"
+#"input_signal_synapse_None_intercepts_-1e-1-1e-01_maxrate2e+9_tau_ref2e-10_tau_rc=2e-8_encoder_1_1_1__1_" \
+        #"-1_-1"
 
 with model:
     input_probe = nengo.Probe(input_signal)  # The original input
