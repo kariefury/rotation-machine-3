@@ -50,7 +50,7 @@ with model:
             2,  # Number of neurons
             dimensions=3,  # each neuron is connected to all (3) input channels.
             intercepts=Uniform(-1e-1, 1e-1),  # Set the intercepts at 0.00001 (threshold for Soma voltage)
-            neuron_type=nengo.LIF(min_voltage=0, tau_ref=2e-11, tau_rc=2e-8),  # Specify type of neuron
+            neuron_type=nengo.LIF(min_voltage=-1, tau_ref=2e-11, tau_rc=2e-8),  # Specify type of neuron
             # Set tau_ref= or tau_rc = here to
             # change those
             # parms
@@ -58,7 +58,8 @@ with model:
             # neurons.
             max_rates=Uniform(2e+9, 2e+9),             # Set the maximum firing rate of the neuron 2Ghz
             # Set the neuron's firing rate to increase for 2 combinations of 3 channel input.
-            encoders=[[-1, -1, 1], [1, -1, -1]]#[[1, 1, 1], [1, -1, -1]],
+            encoders=[[0,0,0],[1,1,1]],
+            normalize_encoders=False#[[-1, -1, 1], [1, -1, -1]]#[[1, 1, 1], [1, -1, -1]],
         )
 
 threeChannels, end_channel = phase_automata(driving_symbol="1", probability_of_transition=False)
@@ -71,7 +72,8 @@ with model:
 with model:
     nengo.Connection(input_signal, neurons, synapse=None)
 
-fname = "input_signal_synapse_None_intercepts_-1e-1-1e-01_maxrate2e+9_tau_ref2e-11_tau_rc=2e-8_min_voltage_0"
+fname = "input_signal_synapse_None_intercepts_-1e-1-1e-01_maxrate2e+9_tau_ref2e-11_tau_rc=2e-8_min_voltage_" \
+        "-1_encoder_0_0_0__1_1_1"
 #"input_signal_synapse_None_intercepts_-1e-1-1e-01_maxrate2e+9_tau_ref2e-10_tau_rc=2e-8_encoder_1_1_1__1_" \
         #"-1_-1"
 
@@ -86,6 +88,7 @@ with model:
 with nengo.Simulator(model, dt=1e-8) as sim:  # Create a simulator
     sim.run(10000e-9)  # Run it for 10k nanosecond
     print(neurons.intercepts)
+    #print(neurons.encoders.sample(1, d=3))
     
 t = sim.trange()
 
