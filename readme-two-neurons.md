@@ -1,4 +1,4 @@
-This study looks at an ensemble of two neurons. The variable behavior of the neurons can be controlled by changing parameters. 
+This study looks at an ensemble of two neurons, modeled in the python file [two-neurons.py](https://github.com/kariefury/rotation-machine-3/blob/main/two-neurons.py). The variable behavior of the neurons can be controlled by changing parameters. 
 
 This readme looks at the effects of changing the synapse connection for the inputs, and also at the effects of changing initial conditions for the ensemble.
 
