@@ -1,8 +1,8 @@
 This study looks at an ensemble of two neurons. The variable behavior of the neurons can be controlled by changing parameters. 
 
-This readme looks at the effects of changing the synapse connection for the inputs, and also at the effects 
+This readme looks at the effects of changing the synapse connection for the inputs, and also at the effects of changing initial conditions for the ensemble.
 
-The inputs are provided by the driven state machine, and they connect to the network through a synapse or through a synapse set to None
+The inputs are provided by the driven state machine, and they connect to the network through a synapse or through a synapse set to None.
 ```
 nengo.Connection(input_signal, neurons, synapse=None)
 ```
