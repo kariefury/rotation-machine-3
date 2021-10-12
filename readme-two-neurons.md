@@ -121,5 +121,9 @@ Now the min voltage setting.
 ![encoders](https://github.com/kariefury/rotation-machine-3/blob/main/fig/two_neuronsinput_signal_synapse_None_intercepts_-1e-1-1e-01_maxrate2e+9_tau_ref2e-11_tau_rc=2e-8_min_voltage_-1_encoder_1_-1_-1___-1_-1_1.png)
 
 The parameters for a LIF neuron, the maximum rate for the ensemble and the intercepts influence the overall behavior of the simulation, and do not need to change over time as the simulation runs.
-Out of the different parameters, the encoders are useful for learning. [Learning new associations](https://www.nengo.ai/nengo/examples/learning/learn-associations.html)[Encoding for image recognition](https://www.nengo.ai/nengo-extras/examples/mnist_single_layer.html).
+Out of the different parameters, the encoders are useful for learning. 
+
+[Learning new associations](https://www.nengo.ai/nengo/examples/learning/learn-associations.html)
+
+[Encoding for image recognition](https://www.nengo.ai/nengo-extras/examples/mnist_single_layer.html)
 
