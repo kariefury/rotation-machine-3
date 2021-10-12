@@ -87,7 +87,7 @@ with model:
     
 with nengo.Simulator(model, dt=1e-8) as sim:  # Create a simulator
     sim.run(10000e-9)  # Run it for 10k nanosecond
-    print(neurons.intercepts)
+    print(neurons.neurons)
     #print(neurons.encoders.sample(1, d=3))
     
 t = sim.trange()
