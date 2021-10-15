@@ -50,5 +50,5 @@ The difference between each L3 neuron probe and the labels is measured and if th
 
 The figure above shows the output of the 2 neurons from Layer 3.
 
-When the experiment is running.
-![](https://github.com/kariefury/rotation-machine-3/blob/main/fig/three-layers-feedback-plots.png)
+When the experiment is running the spike pattern changes dependent on the direction of the ```input_signal```.
+![Input Signal](https://github.com/kariefury/rotation-machine-3/blob/main/fig/three-layers-feedback-plots.png)
