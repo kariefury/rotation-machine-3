@@ -1,6 +1,7 @@
 ### Learning with a 3 Layer, 12 LIF Neuron Network using 3 feedback connections.
 
 Starting off with training data generated from the 3 phase rotation machine, a set of training data is created. Two examples of timeseries from the data is shown in the following figures. The label is the black line and when it switching from low to high, the direction of the pattern reverses.
+
 ![input_pattern_example_probTran_False_padded_zeros_true](https://github.com/kariefury/rotation-machine-3/blob/main/fig/input_pattern_example_probTran_False_padded_zeros_true.png)
 
 The second example shows how the pattern looks when there is a non-zero chance of failing to tranition. **p = 0.2**
