@@ -49,3 +49,6 @@ The difference between each L3 neuron probe and the labels is measured and if th
 ![3layersfeedbck_neuronsl3_2time180s](https://github.com/kariefury/rotation-machine-3/blob/main/fig/3layersfeedbck_neuronsl3_2time180s.png)
 
 The figure above shows the output of the 2 neurons from Layer 3.
+
+When the experiment is running.
+![](https://github.com/kariefury/rotation-machine-3/blob/main/fig/three-layers-feedback-plots.png)
