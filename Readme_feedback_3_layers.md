@@ -49,7 +49,7 @@ The difference between each L3 neuron probe and the labels is measured and if th
 
 ![3layersfeedbck_neuronsl3_2time180s](https://github.com/kariefury/rotation-machine-3/blob/main/fig/3layersfeedbck_neuronsl3_2time180s.png)
 
-The figure above shows the output of the 2 neurons from Layer 3.
+The figure above shows the output of the 2 neurons from Layer 3. The pattern of the driving symbols in this case is ```01010101....```. The experiment takes some time to rise to a steady state. 
 
 When the experiment is running the spike pattern changes dependent on the direction of the ```input_signal```.
 ![Input Signal](https://github.com/kariefury/rotation-machine-3/blob/main/fig/three-layers-feedback-plots.png)
