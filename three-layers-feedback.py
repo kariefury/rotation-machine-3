@@ -51,6 +51,7 @@ ts = 45  # number of timesteps to hold a driving symbol constant for.
 
 threeChannelsOF1, end_channel = phase_automata(driving_symbol="1", probability_of_transition=True, timesteps=ts)
 padded_zeros = np.zeros((3, ts * 2), dtype=float)
+padded_zeros = padded_zeros - 1.0
 threeChannels1 = np.concatenate((threeChannelsOF1, padded_zeros), axis=1)
 threeChannelsOF0, end_channel0 = phase_automata(driving_symbol="0", probability_of_transition=True, timesteps=ts)
 threeChannels0 = np.concatenate((threeChannelsOF0, padded_zeros), axis=1)
@@ -221,11 +222,11 @@ while not good:
             best_neuron_value = sum
         print(best_neuron_value, best_neuron_index, reseed)
         i += 1
-    if (best_neuron_value < 4000):
+    if (best_neuron_value < 30000):
         good = True
     else:
         reseed += 1
-    good = True
+    #good = True
 
 plt.figure()
 plt.title("Filtered output")
