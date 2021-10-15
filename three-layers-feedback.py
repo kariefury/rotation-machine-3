@@ -44,16 +44,16 @@ def phase_automata(driving_symbol='0', number_of_symbols=3, id_of_starting_symbo
     return code, ending_state
 
 
-reseed = 91274 # 91264 # 91254  # 91273
+reseed = 91323 #91280 #91274 # 91264 # 91254  # 91273
 good = False
 number_of_samples = 6
 ts = 45  # number of timesteps to hold a driving symbol constant for.
-
-threeChannelsOF1, end_channel = phase_automata(driving_symbol="1", probability_of_transition=True, timesteps=ts)
+pb = False
+threeChannelsOF1, end_channel = phase_automata(driving_symbol="1", probability_of_transition=pb, timesteps=ts)
 padded_zeros = np.zeros((3, ts * 2), dtype=float)
 padded_zeros = padded_zeros - 1.0
 threeChannels1 = np.concatenate((threeChannelsOF1, padded_zeros), axis=1)
-threeChannelsOF0, end_channel0 = phase_automata(driving_symbol="0", probability_of_transition=True, timesteps=ts)
+threeChannelsOF0, end_channel0 = phase_automata(driving_symbol="0", probability_of_transition=pb, timesteps=ts)
 threeChannels0 = np.concatenate((threeChannelsOF0, padded_zeros), axis=1)
 labels0 = np.zeros((ts * 3, 1), dtype=float)
 labels1 = np.ones((ts * 3, 1), dtype=float)
@@ -61,7 +61,7 @@ bothLabels = np.concatenate((labels0, labels1), axis=0)
 bothPatterns = np.concatenate((threeChannels0, threeChannels1), axis=1)
 
 plt.figure()
-plt.title("Input Pattern and Label Example ProbTran:True PaddedZeros:True")
+plt.title("Input Pattern and Label Example ProbTran:"+str(pb)+" PaddedZeros:True")
 t = np.arange(ts*3*2)
 plt.xlabel('ts (Timestep)' )
 plt.ylabel('Value')
@@ -70,13 +70,12 @@ plt.plot(t,bothPatterns[1],color="green",label="pattern C2")
 plt.plot(t,bothPatterns[2],color="orange",label="pattern C3")
 plt.plot(t,bothLabels+2.0,color="black",label="label")
 plt.legend()
-plt.savefig("fig/input_pattern_example_probTran_True_padded_zeros_true.png")
+plt.savefig("fig/input_pattern_example_probTran_"+str(pb)+"_padded_zeros_true.png")
 i = 1
 while i < number_of_samples:
-    threeChannelsOF1, end_channel = phase_automata(driving_symbol="1", probability_of_transition=True, timesteps=ts)
-    padded_zeros = np.zeros((3, ts * 2), dtype=float)
+    threeChannelsOF1, end_channel = phase_automata(driving_symbol="1", probability_of_transition=pb, timesteps=ts)
     threeChannels1 = np.concatenate((threeChannelsOF1, padded_zeros), axis=1)
-    threeChannelsOF0, end_channel0 = phase_automata(driving_symbol="0", probability_of_transition=True, timesteps=ts)
+    threeChannelsOF0, end_channel0 = phase_automata(driving_symbol="0", probability_of_transition=pb, timesteps=ts)
     threeChannels0 = np.concatenate((threeChannelsOF0, padded_zeros), axis=1)
     labels0 = np.zeros((ts * 3, 1), dtype=float)
     labels1 = np.ones((ts * 3, 1), dtype=float)
@@ -222,7 +221,7 @@ while not good:
             best_neuron_value = sum
         print(best_neuron_value, best_neuron_index, reseed)
         i += 1
-    if (best_neuron_value < 30000):
+    if (best_neuron_value < 12000):
         good = True
     else:
         reseed += 1
