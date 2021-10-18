@@ -244,7 +244,8 @@ while not good:
         good = True
     else:
         reseed += 1
-    #good = True
+    print("sim.dt",sim.dt)
+    good = True
 
 plt.figure()
 plt.title("Filtered output")
