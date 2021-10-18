@@ -44,7 +44,7 @@ def phase_automata(driving_symbol='0', number_of_symbols=3, id_of_starting_symbo
     return code, ending_state
 
 
-reseed = 91323 #91280 #91274 # 91264 # 91254  # 91273
+reseed = 91332 #91323 #91280 #91274 # 91264 # 91254  # 91273
 good = False
 number_of_samples = 6
 ts = 45  # number of timesteps to hold a driving symbol constant for.
@@ -72,13 +72,31 @@ plt.plot(t,bothLabels+2.0,color="black",label="label")
 plt.legend()
 plt.savefig("fig/input_pattern_example_probTran_"+str(pb)+"_padded_zeros_true.png")
 i = 1
+bitstring = "0101100001010"
+w = 0
 while i < number_of_samples:
-    threeChannelsOF1, end_channel = phase_automata(driving_symbol="1", probability_of_transition=pb, timesteps=ts)
+    threeChannelsOF1, end_channel = phase_automata(driving_symbol=bitstring[w], probability_of_transition=pb, 
+                                                                  timesteps=ts)
     threeChannels1 = np.concatenate((threeChannelsOF1, padded_zeros), axis=1)
-    threeChannelsOF0, end_channel0 = phase_automata(driving_symbol="0", probability_of_transition=pb, timesteps=ts)
+    if (bitstring[w] == "0"):
+        labels0 = np.zeros((ts * 3, 1), dtype=float)
+    else:
+        labels0 = np.ones((ts * 3, 1), dtype=float)
+    w += 1
+    w  = w % len(bitstring)
+    threeChannelsOF0, end_channel0 = phase_automata(driving_symbol=bitstring[w], probability_of_transition=pb,
+                                                    timesteps=ts)
+    if (bitstring[w] == "0"):
+        labels1 = np.zeros((ts * 3, 1), dtype=float)
+    else:
+        labels1 = np.ones((ts * 3, 1), dtype=float)
+
+    w += 1
+    w = w % len(bitstring)
+
     threeChannels0 = np.concatenate((threeChannelsOF0, padded_zeros), axis=1)
-    labels0 = np.zeros((ts * 3, 1), dtype=float)
-    labels1 = np.ones((ts * 3, 1), dtype=float)
+    #labels0 = np.zeros((ts * 3, 1), dtype=float)
+    #labels1 = np.ones((ts * 3, 1), dtype=float)
     bothLabelsB = np.concatenate((labels0, labels1), axis=0)
     bothPatternsB = np.concatenate((threeChannels0, threeChannels1), axis=1)
     bothLabelsA = np.copy(bothLabels)
@@ -129,7 +147,7 @@ while not good:
     with model:
         nengo.Connection(input_signal, layer1, synapse=None)
         nengo.Connection(layer1, layer2, synapse=1e-1)
-        nengo.Connection(layer2, layer1, synapse=ts*1e-2)
+        nengo.Connection(layer2, layer1, synapse=ts*1e-1)
         nengo.Connection(layer2, layer3, synapse=1e-2)
         nengo.Connection(layer3, layer2, synapse=ts*1e-1)
 
@@ -168,8 +186,9 @@ while not good:
     plt.title("Filtered L1 output")
     # print(np.shape(sim.data[p_recall][test][0:,0:1]), np.shape(sim.data[p_values][test][0:,0:1]))
     # plt.plot(t, sim.data[p_recall][0:,0:1])# - sim.data[p_values][0:,0:1])
-    plt.plot(t, sim.data[p_keys] + 0, color="g")
+    
     plt.plot(t, sim.data[input_probe] + 2)
+    plt.plot(t, sim.data[p_keys] + 0, color="black")
     print(np.shape(sim.data[filteredl1]))
     plt.plot(t, sim.data[filteredl1][0:, 0:1] + 3, color="b")
     plt.plot(t, sim.data[filteredl1][0:, 1:2] + 4, color="y")
@@ -184,8 +203,8 @@ while not good:
     plt.title("Filtered L2 output")
     # print(np.shape(sim.data[p_recall][test][0:,0:1]), np.shape(sim.data[p_values][test][0:,0:1]))
     # plt.plot(t, sim.data[p_recall][0:,0:1])# - sim.data[p_values][0:,0:1])
-    plt.plot(t, sim.data[p_keys] + 0, color="g")
     plt.plot(t, sim.data[input_probe] + 2)
+    plt.plot(t, sim.data[p_keys] + 0, color="black")
     print(np.shape(sim.data[filteredl2]))
     plt.plot(t, sim.data[filteredl2][0:, 0:1] + 3, color="b")
     plt.plot(t, sim.data[filteredl2][0:, 1:2] + 4, color="y")
@@ -198,22 +217,22 @@ while not good:
     plt.figure()
     plt.title("Filtered L3 output")
 
-    plt.plot(t[test], sim.data[p_keys][test] + 0, color="g")
+    plt.plot(t[test], sim.data[p_keys][test] + 0, color="black")
     plt.plot(t[test], sim.data[input_probe][test] + 2)
     print(np.shape(sim.data[filteredl2]))
     plt.plot(t[test], sim.data[filteredl2][test][0:, 0:1] + 3, color="b")
     plt.plot(t[test], sim.data[filteredl2][test][0:, 1:2] + 4, color="y")
-    plt.savefig('fig/3layersfeedbck_neuronsl3_2.png')
+    plt.savefig('fig/3layersfeedbck_neuronsl3_2_'+str(reseed)+'.png')
 
     plt.clf()
     
     i = 0
     
-    best_neuron_value = np.abs(np.sum(sim.data[filteredl3][0:, 0:0 + 1] - sim.data[p_keys]))
+    best_neuron_value = np.sum((sim.data[filteredl3][0:, 0:0 + 1]+1.0) - (sim.data[p_keys]*2.0))
     print(best_neuron_value)
     best_neuron_index = 0
     while i < num_neurons_l3:
-        sum = np.abs(np.sum(sim.data[filteredl3][0:, i:i + 1] - sim.data[p_keys]))
+        sum = np.sum((sim.data[filteredl3][0:, i:i + 1]+1.0) - (sim.data[p_keys]*2.0))
         # print(i, sum)
 
         if (sum < best_neuron_value):
@@ -221,7 +240,7 @@ while not good:
             best_neuron_value = sum
         print(best_neuron_value, best_neuron_index, reseed)
         i += 1
-    if (best_neuron_value < 12000):
+    if (np.abs(best_neuron_value) < 20000):
         good = True
     else:
         reseed += 1
