@@ -47,16 +47,18 @@ def phase_automata(driving_symbol='0', number_of_symbols=3, id_of_starting_symbo
 reseed = 91332 #91323 #91280 #91274 # 91264 # 91254  # 91273
 good = False
 number_of_samples = 6
-ts = 45  # number of timesteps to hold a driving symbol constant for.
+ts = 6  # number of timesteps to hold a driving symbol constant for.
 pb = False
+pt = 3e-2 # seconds to present each step of input
+label_length = ts * 3 # In Timesteps, multiply by dt to get actual length of time
 threeChannelsOF1, end_channel = phase_automata(driving_symbol="1", probability_of_transition=pb, timesteps=ts)
 padded_zeros = np.zeros((3, ts * 2), dtype=float)
 padded_zeros = padded_zeros - 1.0
 threeChannels1 = np.concatenate((threeChannelsOF1, padded_zeros), axis=1)
 threeChannelsOF0, end_channel0 = phase_automata(driving_symbol="0", probability_of_transition=pb, timesteps=ts)
 threeChannels0 = np.concatenate((threeChannelsOF0, padded_zeros), axis=1)
-labels0 = np.zeros((ts * 3, 1), dtype=float)
-labels1 = np.ones((ts * 3, 1), dtype=float)
+labels0 = np.zeros((label_length, 1), dtype=float)
+labels1 = np.ones((label_length, 1), dtype=float)
 bothLabels = np.concatenate((labels0, labels1), axis=0)
 bothPatterns = np.concatenate((threeChannels0, threeChannels1), axis=1)
 
@@ -141,8 +143,8 @@ while not good:
             )
 
     with model:
-        input_signal = nengo.Node(PresentInput(tC, presentation_time=3e-2))
-        input_keys = nengo.Node(PresentInput(labels, presentation_time=3e-2))
+        input_signal = nengo.Node(PresentInput(tC, presentation_time=pt))
+        input_keys = nengo.Node(PresentInput(labels, presentation_time=pt))
 
     with model:
         nengo.Connection(input_signal, layer1, synapse=None)
@@ -177,6 +179,8 @@ while not good:
     train = t <= simT / 2
     test = ~train
 
+    
+    
     # plt.figure()
     # plt.title("Value Error During Training")
     # plt.plot(t[train], sim.data[p_error][train])
@@ -226,6 +230,13 @@ while not good:
 
     plt.clf()
     
+    plt.figure()
+    time_input_signal = t <= pt*ts
+    plt.title("single timesteps of input")
+    plt.plot(t[time_input_signal],sim.data[input_probe][time_input_signal][0: , 0:1], color="blue")
+    plt.plot(t[time_input_signal],sim.data[input_probe][time_input_signal][0: , 1:2]+2.1, color="orange")
+    plt.plot(t[time_input_signal],sim.data[input_probe][time_input_signal][0: , 2:3] + 4.2 , color="green")
+    plt.savefig('fig/inputTiming.png')
     i = 0
     
     best_neuron_value = np.sum((sim.data[filteredl3][0:, 0:0 + 1]+1.0) - (sim.data[p_keys]*2.0))
@@ -245,6 +256,43 @@ while not good:
     else:
         reseed += 1
     print("sim.dt",sim.dt)
+    print("Symbol presentation time",pt)
+    print("Label length", label_length)
+    print("layer 1 Tau RC",layer1.neuron_type.tau_rc)
+    print("layer1 refractory period",layer1.neuron_type.tau_ref)
+    plt.rcdefaults()
+    fig, ax = plt.subplots()
+    
+    people = ('Sim dt', 'Pulse Time', 'Pulse Spacing', 'Rotation Time', 'Label Time', 'L1 Tau RC', 'L1 Tau Ref', 
+    'L2 Tau RC', 
+              "L2 Tau Ref", 
+              "L3 Tau RC", "L3 Tau REf")
+    y_pos = np.arange(len(people))
+    print (y_pos)
+    performance = np.zeros(len(people),dtype=float)
+    lbs = [1,2,3,4,5,6,7,8,9,10]
+    #performance = 3 + 10 * np.random.rand(len(people))
+    performance[0] = sim.dt
+    performance[1] = pt
+    performance[2] = 0.0
+    performance[3] = ts*pt
+    performance[4] = label_length*pt
+    performance[5] = layer1.neuron_type.tau_rc
+    performance[6] = layer1.neuron_type.tau_ref
+    performance[7] = layer2.neuron_type.tau_rc
+    performance[8] = layer2.neuron_type.tau_ref
+    performance[9] = layer3.neuron_type.tau_rc
+    performance[10] = layer3.neuron_type.tau_ref
+    ax.barh(y_pos, performance)
+    ax.set_yticks(y_pos)
+    #plt.xscale("log")
+    ax.set_yticklabels(people)
+    ax.invert_yaxis()  # labels read top-to-bottom
+    ax.set_xlabel('Time (s)')
+    ax.set_title('Preset Timing Parameters')
+
+    plt.show()
+    
     good = True
 
 plt.figure()
