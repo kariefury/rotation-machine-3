@@ -44,19 +44,21 @@ def phase_automata(driving_symbol='0', number_of_symbols=3, id_of_starting_symbo
     return code, ending_state
 
 
-reseed = 91323 #91280 #91274 # 91264 # 91254  # 91273
+reseed = 91332 #91323 #91280 #91274 # 91264 # 91254  # 91273
 good = False
 number_of_samples = 6
-ts = 45  # number of timesteps to hold a driving symbol constant for.
+ts = 6  # number of timesteps to hold a driving symbol constant for.
 pb = False
+pt = 3e-2 # seconds to present each step of input
+label_length = ts * 3 # In Timesteps, multiply by dt to get actual length of time
 threeChannelsOF1, end_channel = phase_automata(driving_symbol="1", probability_of_transition=pb, timesteps=ts)
 padded_zeros = np.zeros((3, ts * 2), dtype=float)
 padded_zeros = padded_zeros - 1.0
 threeChannels1 = np.concatenate((threeChannelsOF1, padded_zeros), axis=1)
 threeChannelsOF0, end_channel0 = phase_automata(driving_symbol="0", probability_of_transition=pb, timesteps=ts)
 threeChannels0 = np.concatenate((threeChannelsOF0, padded_zeros), axis=1)
-labels0 = np.zeros((ts * 3, 1), dtype=float)
-labels1 = np.ones((ts * 3, 1), dtype=float)
+labels0 = np.zeros((label_length, 1), dtype=float)
+labels1 = np.ones((label_length, 1), dtype=float)
 bothLabels = np.concatenate((labels0, labels1), axis=0)
 bothPatterns = np.concatenate((threeChannels0, threeChannels1), axis=1)
 
@@ -72,13 +74,31 @@ plt.plot(t,bothLabels+2.0,color="black",label="label")
 plt.legend()
 plt.savefig("fig/input_pattern_example_probTran_"+str(pb)+"_padded_zeros_true.png")
 i = 1
+bitstring = "0101100001010"
+w = 0
 while i < number_of_samples:
-    threeChannelsOF1, end_channel = phase_automata(driving_symbol="1", probability_of_transition=pb, timesteps=ts)
+    threeChannelsOF1, end_channel = phase_automata(driving_symbol=bitstring[w], probability_of_transition=pb, 
+                                                                  timesteps=ts)
     threeChannels1 = np.concatenate((threeChannelsOF1, padded_zeros), axis=1)
-    threeChannelsOF0, end_channel0 = phase_automata(driving_symbol="0", probability_of_transition=pb, timesteps=ts)
+    if (bitstring[w] == "0"):
+        labels0 = np.zeros((ts * 3, 1), dtype=float)
+    else:
+        labels0 = np.ones((ts * 3, 1), dtype=float)
+    w += 1
+    w  = w % len(bitstring)
+    threeChannelsOF0, end_channel0 = phase_automata(driving_symbol=bitstring[w], probability_of_transition=pb,
+                                                    timesteps=ts)
+    if (bitstring[w] == "0"):
+        labels1 = np.zeros((ts * 3, 1), dtype=float)
+    else:
+        labels1 = np.ones((ts * 3, 1), dtype=float)
+
+    w += 1
+    w = w % len(bitstring)
+
     threeChannels0 = np.concatenate((threeChannelsOF0, padded_zeros), axis=1)
-    labels0 = np.zeros((ts * 3, 1), dtype=float)
-    labels1 = np.ones((ts * 3, 1), dtype=float)
+    #labels0 = np.zeros((ts * 3, 1), dtype=float)
+    #labels1 = np.ones((ts * 3, 1), dtype=float)
     bothLabelsB = np.concatenate((labels0, labels1), axis=0)
     bothPatternsB = np.concatenate((threeChannels0, threeChannels1), axis=1)
     bothLabelsA = np.copy(bothLabels)
@@ -123,13 +143,13 @@ while not good:
             )
 
     with model:
-        input_signal = nengo.Node(PresentInput(tC, presentation_time=3e-2))
-        input_keys = nengo.Node(PresentInput(labels, presentation_time=3e-2))
+        input_signal = nengo.Node(PresentInput(tC, presentation_time=pt))
+        input_keys = nengo.Node(PresentInput(labels, presentation_time=pt))
 
     with model:
         nengo.Connection(input_signal, layer1, synapse=None)
         nengo.Connection(layer1, layer2, synapse=1e-1)
-        nengo.Connection(layer2, layer1, synapse=ts*1e-2)
+        nengo.Connection(layer2, layer1, synapse=ts*1e-1)
         nengo.Connection(layer2, layer3, synapse=1e-2)
         nengo.Connection(layer3, layer2, synapse=ts*1e-1)
 
@@ -159,6 +179,8 @@ while not good:
     train = t <= simT / 2
     test = ~train
 
+    
+    
     # plt.figure()
     # plt.title("Value Error During Training")
     # plt.plot(t[train], sim.data[p_error][train])
@@ -168,8 +190,9 @@ while not good:
     plt.title("Filtered L1 output")
     # print(np.shape(sim.data[p_recall][test][0:,0:1]), np.shape(sim.data[p_values][test][0:,0:1]))
     # plt.plot(t, sim.data[p_recall][0:,0:1])# - sim.data[p_values][0:,0:1])
-    plt.plot(t, sim.data[p_keys] + 0, color="g")
+    
     plt.plot(t, sim.data[input_probe] + 2)
+    plt.plot(t, sim.data[p_keys] + 0, color="black")
     print(np.shape(sim.data[filteredl1]))
     plt.plot(t, sim.data[filteredl1][0:, 0:1] + 3, color="b")
     plt.plot(t, sim.data[filteredl1][0:, 1:2] + 4, color="y")
@@ -184,8 +207,8 @@ while not good:
     plt.title("Filtered L2 output")
     # print(np.shape(sim.data[p_recall][test][0:,0:1]), np.shape(sim.data[p_values][test][0:,0:1]))
     # plt.plot(t, sim.data[p_recall][0:,0:1])# - sim.data[p_values][0:,0:1])
-    plt.plot(t, sim.data[p_keys] + 0, color="g")
     plt.plot(t, sim.data[input_probe] + 2)
+    plt.plot(t, sim.data[p_keys] + 0, color="black")
     print(np.shape(sim.data[filteredl2]))
     plt.plot(t, sim.data[filteredl2][0:, 0:1] + 3, color="b")
     plt.plot(t, sim.data[filteredl2][0:, 1:2] + 4, color="y")
@@ -198,22 +221,29 @@ while not good:
     plt.figure()
     plt.title("Filtered L3 output")
 
-    plt.plot(t[test], sim.data[p_keys][test] + 0, color="g")
+    plt.plot(t[test], sim.data[p_keys][test] + 0, color="black")
     plt.plot(t[test], sim.data[input_probe][test] + 2)
     print(np.shape(sim.data[filteredl2]))
     plt.plot(t[test], sim.data[filteredl2][test][0:, 0:1] + 3, color="b")
     plt.plot(t[test], sim.data[filteredl2][test][0:, 1:2] + 4, color="y")
-    plt.savefig('fig/3layersfeedbck_neuronsl3_2.png')
+    plt.savefig('fig/3layersfeedbck_neuronsl3_2_'+str(reseed)+'.png')
 
     plt.clf()
     
+    plt.figure()
+    time_input_signal = t <= pt*ts
+    plt.title("single timesteps of input")
+    plt.plot(t[time_input_signal],sim.data[input_probe][time_input_signal][0: , 0:1], color="blue")
+    plt.plot(t[time_input_signal],sim.data[input_probe][time_input_signal][0: , 1:2]+2.1, color="orange")
+    plt.plot(t[time_input_signal],sim.data[input_probe][time_input_signal][0: , 2:3] + 4.2 , color="green")
+    plt.savefig('fig/inputTiming.png')
     i = 0
     
-    best_neuron_value = np.abs(np.sum(sim.data[filteredl3][0:, 0:0 + 1] - sim.data[p_keys]))
+    best_neuron_value = np.sum((sim.data[filteredl3][0:, 0:0 + 1]+1.0) - (sim.data[p_keys]*2.0))
     print(best_neuron_value)
     best_neuron_index = 0
     while i < num_neurons_l3:
-        sum = np.abs(np.sum(sim.data[filteredl3][0:, i:i + 1] - sim.data[p_keys]))
+        sum = np.sum((sim.data[filteredl3][0:, i:i + 1]+1.0) - (sim.data[p_keys]*2.0))
         # print(i, sum)
 
         if (sum < best_neuron_value):
@@ -221,11 +251,49 @@ while not good:
             best_neuron_value = sum
         print(best_neuron_value, best_neuron_index, reseed)
         i += 1
-    if (best_neuron_value < 12000):
+    if (np.abs(best_neuron_value) < 20000):
         good = True
     else:
         reseed += 1
-    #good = True
+    print("sim.dt",sim.dt)
+    print("Symbol presentation time",pt)
+    print("Label length", label_length)
+    print("layer 1 Tau RC",layer1.neuron_type.tau_rc)
+    print("layer1 refractory period",layer1.neuron_type.tau_ref)
+    plt.rcdefaults()
+    fig, ax = plt.subplots()
+    
+    people = ('Sim dt', 'Pulse Time', 'Pulse Spacing', 'Rotation Time', 'Label Time', 'L1 Tau RC', 'L1 Tau Ref', 
+    'L2 Tau RC', 
+              "L2 Tau Ref", 
+              "L3 Tau RC", "L3 Tau REf")
+    y_pos = np.arange(len(people))
+    print (y_pos)
+    performance = np.zeros(len(people),dtype=float)
+    lbs = [1,2,3,4,5,6,7,8,9,10]
+    #performance = 3 + 10 * np.random.rand(len(people))
+    performance[0] = sim.dt
+    performance[1] = pt
+    performance[2] = 0.0
+    performance[3] = ts*pt
+    performance[4] = label_length*pt
+    performance[5] = layer1.neuron_type.tau_rc
+    performance[6] = layer1.neuron_type.tau_ref
+    performance[7] = layer2.neuron_type.tau_rc
+    performance[8] = layer2.neuron_type.tau_ref
+    performance[9] = layer3.neuron_type.tau_rc
+    performance[10] = layer3.neuron_type.tau_ref
+    ax.barh(y_pos, performance)
+    ax.set_yticks(y_pos)
+    #plt.xscale("log")
+    ax.set_yticklabels(people)
+    ax.invert_yaxis()  # labels read top-to-bottom
+    ax.set_xlabel('Time (s)')
+    ax.set_title('Preset Timing Parameters')
+
+    plt.show()
+    
+    good = True
 
 plt.figure()
 plt.title("Filtered output")
