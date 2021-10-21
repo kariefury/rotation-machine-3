@@ -46,16 +46,18 @@ def preset_timing_plot():
 
     plt.savefig('fig/preset_timing_parameters/preset_timing_parmeters_pt_eq_'+str(pt)[0:4]+'.png')
 
-def phase_automata(driving_symbol='0', number_of_symbols=3, id_of_starting_symbol=0, timesteps=9,
-                   probability_of_transition=False):
-    code = np.zeros((number_of_symbols, timesteps), dtype=float)
+def phase_automata_fractional_pulse(driving_symbol='0', number_of_symbols=3, id_of_starting_symbol=0, timesteps=9,
+                   probability_of_transition=False,pulse_length=100,pulse_gap=100):
+    code = np.zeros((number_of_symbols, timesteps*(pulse_length+pulse_gap)), dtype=float)
     code = code - 1
     state = id_of_starting_symbol
     i = 0
-    while i < timesteps:
+    while i < (timesteps*(pulse_length+pulse_gap)):
         u = True
         j = 0
+        print("i",i)
         while j < number_of_symbols:
+            print("j",j)
             if state == j and u:
                 mu, sigma = 1, 0.5  # mean and standard deviation
                 if probability_of_transition:
@@ -71,43 +73,55 @@ def phase_automata(driving_symbol='0', number_of_symbols=3, id_of_starting_symbo
                         state = id_of_starting_symbol
                         print("ILLEGAL DRIVING SYMBOL")
                     # print('passing to state ', state, 'driving symbol ', driving_symbol)
-                    code[j][i] = 1
+                    k = 0
+                    while k < pulse_length:
+                        print("k",k)
+                        code[j][i+k] = 1
+                        k += 1
+
+                    while k < (pulse_length+pulse_gap):
+                        print("k",k)
+                        code[j][i+k] = -1.0
+                        k += 1
                     u = False
                 else:
                     state = j
                     # print('staying in state', state)
             j += 1
-        i += 1
+        i += (pulse_length+pulse_gap)
     ending_state = state
     return code, ending_state
 
 
 reseed = 91332 #91323 #91280 #91274 # 91264 # 91254  # 91273
 good = False
-number_of_samples = 2
-ts = 3  # number of timesteps to hold a driving symbol constant for.
+number_of_samples = 12
+ts = 6  # number of possible transitions to hold a driving symbol constant for.
 pb = False
 pt = 3e-3 # seconds to present each step of input
-label_length = ts * 3 # In Timesteps, multiply by dt to get actual length of time
-padded_zeros = np.zeros((3, ts * 2), dtype=float)
+pulse_length = 20
+pulse_gap = 3
+label_length = ts * 3 * (pulse_length+pulse_gap)# In Timesteps, multiply by dt to get actual length of time
+padded_zeros = np.zeros((3, ts * 2 * (pulse_length+pulse_gap)), dtype=float)
 padded_zeros = padded_zeros - 1.0
 
 
 i = 1
 
-threeChannelsOF1, end_channel = phase_automata(driving_symbol="1", probability_of_transition=pb, timesteps=ts)
+threeChannelsOF1, end_channel = phase_automata_fractional_pulse(driving_symbol="1", probability_of_transition=pb, timesteps=ts,pulse_length=pulse_length,pulse_gap=pulse_gap)
 threeChannels1 = np.concatenate((threeChannelsOF1, padded_zeros), axis=1)
-threeChannelsOF0, end_channel0 = phase_automata(driving_symbol="0", probability_of_transition=pb, timesteps=ts)
+threeChannelsOF0, end_channel0 = phase_automata_fractional_pulse(driving_symbol="0", probability_of_transition=pb, timesteps=ts,pulse_length=pulse_length,pulse_gap=pulse_gap)
 threeChannels0 = np.concatenate((threeChannelsOF0, padded_zeros), axis=1)
 labels0 = np.zeros((label_length, 1), dtype=float)
 labels1 = np.ones((label_length, 1), dtype=float)
+
 bothLabels = np.concatenate((labels0, labels1), axis=0)
 bothPatterns = np.concatenate((threeChannels0, threeChannels1), axis=1)
 
 bitstring = "0111100001010000000111111101010101010011001100011100101010000111100000000000000000000000000000000000000000000000000000000000000000"
 plt.figure()
 plt.title("Input Pattern and Label Example ProbTran:"+str(pb)+" PaddedZeros:True")
-t = np.arange(ts*3*2)
+t = np.arange(ts*(pulse_gap+pulse_length)*3*2)
 plt.xlabel('ts (Timestep)' )
 plt.ylabel('Value')
 plt.plot(t,bothPatterns[0],color="blue",label="pattern C1")
@@ -120,8 +134,8 @@ plt.savefig("fig/input_pattern_example_probTran_"+str(pb)+"_padded_zeros_true.pn
 w = 0
 while i < number_of_samples:
     print(bitstring[w])
-    threeChannelsOF, end_channel = phase_automata(driving_symbol=bitstring[w], probability_of_transition=pb, 
-                                                                  timesteps=ts)
+    threeChannelsOF, end_channel = phase_automata_fractional_pulse(driving_symbol=bitstring[w], probability_of_transition=pb, 
+                                                                  timesteps=ts,pulse_length=pulse_length,pulse_gap=pulse_gap)
     threeChannels = np.concatenate((threeChannelsOF, padded_zeros), axis=1)
     if (bitstring[w] == "0"):
         labels0or1 = np.zeros((ts * 3, 1), dtype=float)
@@ -142,6 +156,8 @@ labels = bothLabels
 
 while not good:
     model = nengo.Network(label='Three Layers with feedback', seed=reseed)
+    sim = nengo.Simulator(model)
+    pt = sim.dt
     num_neurons_l1 = 4
     num_neurons_l2 = 6
     num_neurons_l3 = 2
@@ -260,7 +276,7 @@ while not good:
     plt.clf()
 
     plt.figure()
-    time_input_signal = t <= pt*ts
+    time_input_signal = t <= (pt*ts*(pulse_length+pulse_gap))
     plt.title("single timesteps of input")
     plt.plot(t[time_input_signal],sim.data[input_probe][time_input_signal][0: , 0:1], color="blue")
     plt.plot(t[time_input_signal],sim.data[input_probe][time_input_signal][0: , 1:2]+2.1, color="green")
