@@ -100,7 +100,8 @@ def plot_data(q):
     plt.plot(t[time_input_signal],sim.data[input_probe][time_input_signal][0: , 2:3] + 4.2 , color="orange")
     plt.savefig('fig/inputTiming.png')
 
-    plt.close()
+    plt.close("all")
+    
 
 def phase_automata_fractional_pulse(driving_symbol='0', number_of_symbols=3, id_of_starting_symbol=0, timesteps=9,
                    probability_of_transition=False,pulse_length=100,pulse_gap=100):
@@ -149,7 +150,7 @@ def phase_automata_fractional_pulse(driving_symbol='0', number_of_symbols=3, id_
     return code, ending_state
 
 
-reseed = 11524#9166#8 #91521 #91427 #91377 #91362 #91332 #91323 #91280 #91274 # 91264 # 91254  # 91273
+reseed = 13544 #13537# 11524#9166#8 #91521 #91427 #91377 #91362 #91332 #91323 #91280 #91274 # 91264 # 91254  # 91273
 good = False
 number_of_samples = 2
 ts = 6  # number of possible transitions to hold a driving symbol constant for.
@@ -218,18 +219,29 @@ while not good:
     num_neurons_l2 = 6
     num_neurons_l3 = 2
     with model:
-        ntr = Uniform(7e-2,4e-3).sample(1)[0]
-        ntrc = Uniform(1e-2,4e-3).sample(1)[0]
+        ntr = Uniform(1e-2,4e-3).sample(1)[0]
+        ntrc = Uniform(1e-3,9e-3).sample(1)[0]
         l2_ntr = Uniform(1e-2,4e-3).sample(1)[0]
         l2_ntrc = Uniform(1e-1,4e-3).sample(1)[0]
-        l3_ntr = Uniform(1e-2,4e-3).sample(1)[0]
+        l3_ntr = Uniform(3e-2,4e-3).sample(1)[0]
         l3_ntrc = Uniform(1e-2,1e-3).sample(1)[0]
+        ff = Uniform(2e-1,2e-3).sample(1)[0]
+        fb = Uniform(2e-1,2e-3).sample(1)[0]
         # ntr= 0.04857797742868027
         # ntrc= 0.005298126253483592
         # l2_ntr= 0.07872599281604377
         # l2_ntrc= 0.004172924890959869
         # l3_ntr= 0.008004251267465179
         # l3_ntrc= 0.0015320812730265365
+        # Seed 13544
+        ntr= 0.006091425462138759
+        ntrc= 0.0037420741870769804
+        l2_ntr= 0.006238565394075678
+        l2_ntrc= 0.04990662443768488
+        l3_ntr= 0.020844749509316224
+        l3_ntrc= 0.005085923595315616
+        ff= 0.07203125488564155
+        fb= 0.10373363244164732
         layer1 = nengo.Ensemble(
             num_neurons_l1,  # Number of neurons
             dimensions=3,  # each neuron is connected to all (3) input channels.
@@ -262,8 +274,6 @@ while not good:
 
     with model:
         nengo.Connection(input_signal, layer1, synapse=None,label="input signals to layer 1")
-        ff = Uniform(2e-1,2e-2).sample(1)[0]
-        fb = Uniform(2e-1,2e-2).sample(1)[0]
         nengo.Connection(layer1, layer2, synapse=ff, label="layer 1 to layer2")
         nengo.Connection(layer2, layer1, synapse=fb, label="layer 2 to layer 1")
         conn = nengo.Connection(layer2, layer3, synapse=ff, label="layer 2 to layer 3")
@@ -323,7 +333,7 @@ while not good:
             #best_neuron_indexB = i
             #best_neuron_valueB = sumB
 
-        if sumB < 20:
+        if sumB < 20: 
             #best_neuron_indexA = i
             #best_neuron_valueA = sumA
             best_neuron_indexB = i
@@ -332,6 +342,8 @@ while not good:
         print(best_neuron_valueA, best_neuron_indexA, best_neuron_valueB, best_neuron_indexB, reseed)
         i += 1
 
+    plot_data(str(reseed))
+    good = True
     if (best_neuron_valueA < 20):
         #print("here")
         if (best_neuron_valueB < 20):
