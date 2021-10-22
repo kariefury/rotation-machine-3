@@ -16,7 +16,7 @@ def preset_timing_plot():
     plt.rcdefaults()
     fig, ax = plt.subplots()
     
-    people = ('Sim dt', 'Pulse Time', 'Pulse Spacing', 'Rotation Time', 'Label Time', 'L1 Tau RC', 'L1 Tau Ref', 
+    people = ('Sim dt', 'Pulse Length', 'Pulse Gap', 'Rotation Time', 'Label Time', 'L1 Tau RC', 'L1 Tau Ref', 
     'L2 Tau RC', 
               "L2 Tau Ref", 
               "L3 Tau RC", "L3 Tau REf")
@@ -26,8 +26,8 @@ def preset_timing_plot():
     lbs = [1,2,3,4,5,6,7,8,9,10]
     #performance = 3 + 10 * np.random.rand(len(people))
     performance[0] = sim.dt
-    performance[1] = pt
-    performance[2] = 0.0
+    performance[1] = (pt*pulse_length)
+    performance[2] = (pt*pulse_gap)
     performance[3] = ts*pt
     performance[4] = label_length*pt
     performance[5] = layer1.neuron_type.tau_rc
@@ -43,8 +43,64 @@ def preset_timing_plot():
     ax.invert_yaxis()  # labels read top-to-bottom
     ax.set_xlabel('Time (s)')
     ax.set_title('Preset Timing Parameters')
+    plt.tight_layout() 
+    plt.savefig('fig/preset_timing_parameters/preset_timing_parmeters.png')
 
-    plt.savefig('fig/preset_timing_parameters/preset_timing_parmeters_pt_eq_'+str(pt)[0:4]+'.png')
+def plot_data(q):
+    plt.figure()
+    plt.title("Filtered L1 output")
+    # print(np.shape(sim.data[p_recall][test][0:,0:1]), np.shape(sim.data[p_values][test][0:,0:1]))
+    # plt.plot(t, sim.data[p_recall][0:,0:1])# - sim.data[p_values][0:,0:1])
+
+    plt.plot(t, sim.data[input_probe] + 2)
+    plt.plot(t, sim.data[p_keys] + 0, color="black")
+    print(np.shape(sim.data[filteredl1]))
+    plt.plot(t, sim.data[filteredl1][0:, 0:1] + 3, color="b")
+    plt.plot(t, sim.data[filteredl1][0:, 1:2] + 4, color="y")
+    plt.plot(t, sim.data[filteredl1][0:, 2:3] + 5, color="k")
+    plt.plot(t, sim.data[filteredl1][0:, 3:4] + 6, color="m")
+    plt.savefig('fig/3layersfeedbck_neuronsl1_4.png')
+    #    plt.plot(t, sim.data[filtered][0:, 4:5] + 7, color="r")
+    #    plt.plot(t, sim.data[filtered][0:, 5:6] + 8, color="g")
+    #    plt.plot(t, sim.data[filtered][0:, 6:7] + 9, color="#aabbcc")
+    plt.close()
+    plt.figure()
+    plt.title("Filtered L2 output")
+    # print(np.shape(sim.data[p_recall][test][0:,0:1]), np.shape(sim.data[p_values][test][0:,0:1]))
+    # plt.plot(t, sim.data[p_recall][0:,0:1])# - sim.data[p_values][0:,0:1])
+    plt.plot(t, sim.data[input_probe] + 2)
+    plt.plot(t, sim.data[p_keys] + 0, color="black")
+    print(np.shape(sim.data[filteredl2]))
+    plt.plot(t, sim.data[filteredl2][0:, 0:1] + 3, color="b")
+    plt.plot(t, sim.data[filteredl2][0:, 1:2] + 4, color="y")
+    plt.plot(t, sim.data[filteredl2][0:, 2:3] + 5, color="k")
+    plt.plot(t, sim.data[filteredl2][0:, 3:4] + 6, color="m")
+    plt.plot(t, sim.data[filteredl2][0:, 4:5] + 7, color="r")
+    plt.plot(t, sim.data[filteredl2][0:, 5:6] + 8, color="g")
+    plt.savefig('fig/3layersfeedbck_neuronsl2_6.png')
+    plt.close()
+    plt.figure()
+    plt.title("Filtered L3 output")
+
+    plt.plot(t, sim.data[p_keys] + 0, color="black")
+    plt.plot(t, sim.data[input_probe] + 2)
+    print(np.shape(sim.data[filteredl2]))
+    plt.plot(t, sim.data[filteredl2][0:, 0:1] + 3, color="b")
+    plt.plot(t, sim.data[filteredl2][0:, 1:2] + 4, color="y")
+    plt.savefig('fig/3layersfeedbck_neuronsl3_2_search'+q+'.png')
+    #plt.show()
+
+    plt.clf()
+    plt.close()
+    plt.figure()
+    time_input_signal = t <= (pt*ts*(pulse_length+pulse_gap))
+    plt.title("single timesteps of input")
+    plt.plot(t[time_input_signal],sim.data[input_probe][time_input_signal][0: , 0:1], color="blue")
+    plt.plot(t[time_input_signal],sim.data[input_probe][time_input_signal][0: , 1:2]+2.1, color="green")
+    plt.plot(t[time_input_signal],sim.data[input_probe][time_input_signal][0: , 2:3] + 4.2 , color="orange")
+    plt.savefig('fig/inputTiming.png')
+
+    plt.close()
 
 def phase_automata_fractional_pulse(driving_symbol='0', number_of_symbols=3, id_of_starting_symbol=0, timesteps=9,
                    probability_of_transition=False,pulse_length=100,pulse_gap=100):
@@ -55,9 +111,9 @@ def phase_automata_fractional_pulse(driving_symbol='0', number_of_symbols=3, id_
     while i < (timesteps*(pulse_length+pulse_gap)):
         u = True
         j = 0
-        print("i",i)
+#        print("i",i)
         while j < number_of_symbols:
-            print("j",j)
+ #           print("j",j)
             if state == j and u:
                 mu, sigma = 1, 0.5  # mean and standard deviation
                 if probability_of_transition:
@@ -75,12 +131,12 @@ def phase_automata_fractional_pulse(driving_symbol='0', number_of_symbols=3, id_
                     # print('passing to state ', state, 'driving symbol ', driving_symbol)
                     k = 0
                     while k < pulse_length:
-                        print("k",k)
+                        #print("k",k)
                         code[j][i+k] = 1
                         k += 1
 
                     while k < (pulse_length+pulse_gap):
-                        print("k",k)
+                        #print("k",k)
                         code[j][i+k] = -1.0
                         k += 1
                     u = False
@@ -93,14 +149,14 @@ def phase_automata_fractional_pulse(driving_symbol='0', number_of_symbols=3, id_
     return code, ending_state
 
 
-reseed = 91332 #91323 #91280 #91274 # 91264 # 91254  # 91273
+reseed = 9166#8 #91521 #91427 #91377 #91362 #91332 #91323 #91280 #91274 # 91264 # 91254  # 91273
 good = False
-number_of_samples = 12
+number_of_samples = 2
 ts = 6  # number of possible transitions to hold a driving symbol constant for.
 pb = False
 pt = 3e-3 # seconds to present each step of input
-pulse_length = 20
-pulse_gap = 3
+pulse_length = 2
+pulse_gap = 0
 label_length = ts * 3 * (pulse_length+pulse_gap)# In Timesteps, multiply by dt to get actual length of time
 padded_zeros = np.zeros((3, ts * 2 * (pulse_length+pulse_gap)), dtype=float)
 padded_zeros = padded_zeros - 1.0
@@ -131,16 +187,16 @@ plt.plot(t,bothLabels+2.0,color="black",label="label")
 plt.legend()
 plt.savefig("fig/input_pattern_example_probTran_"+str(pb)+"_padded_zeros_true.png")
 
+plot_now = True
 w = 0
 while i < number_of_samples:
-    print(bitstring[w])
     threeChannelsOF, end_channel = phase_automata_fractional_pulse(driving_symbol=bitstring[w], probability_of_transition=pb, 
-                                                                  timesteps=ts,pulse_length=pulse_length,pulse_gap=pulse_gap)
+                                                                  timesteps=ts,id_of_starting_symbol=np.random.randint(0, 3),pulse_length=pulse_length,pulse_gap=pulse_gap)
     threeChannels = np.concatenate((threeChannelsOF, padded_zeros), axis=1)
     if (bitstring[w] == "0"):
-        labels0or1 = np.zeros((ts * 3, 1), dtype=float)
+        labels0or1 = np.zeros((label_length, 1), dtype=float)
     else:
-        labels0or1 = np.ones((ts * 3, 1), dtype=float)
+        labels0or1 = np.ones((label_length, 1), dtype=float)
     w += 1
     w  = w % len(bitstring)
 
@@ -162,29 +218,42 @@ while not good:
     num_neurons_l2 = 6
     num_neurons_l3 = 2
     with model:
+        ntr = Uniform(7e-2,4e-3).sample(1)[0]
+        ntrc = Uniform(1e-2,4e-3).sample(1)[0]
+        l2_ntr = Uniform(1e-2,4e-3).sample(1)[0]
+        l2_ntrc = Uniform(1e-1,4e-3).sample(1)[0]
+        l3_ntr = Uniform(1e-2,4e-3).sample(1)[0]
+        l3_ntrc = Uniform(1e-2,1e-3).sample(1)[0]
+        # ntr= 0.04857797742868027
+        # ntrc= 0.005298126253483592
+        # l2_ntr= 0.07872599281604377
+        # l2_ntrc= 0.004172924890959869
+        # l3_ntr= 0.008004251267465179
+        # l3_ntrc= 0.0015320812730265365
         layer1 = nengo.Ensemble(
             num_neurons_l1,  # Number of neurons
             dimensions=3,  # each neuron is connected to all (3) input channels.
             # Set intercept to 0.5
-            neuron_type=nengo.LIF(min_voltage=0, tau_ref=5e-2, tau_rc=1e-2),  # Specify type of neuron
-            max_rates=Uniform(1 / 6e-2, 1 / 6e-2),  # Set the maximum firing rate of the neuron 500Mhz
+            neuron_type=nengo.LIF(min_voltage=0, tau_ref=ntr, tau_rc=ntrc),  # Specify type of neuron
+            max_rates=Uniform(1 / (ntr+sim.dt), 1 / (ntr+sim.dt)),  # Set the maximum firing rate of the neuron 500Mhz
         )
-
+        
         layer2 = nengo.Ensemble(
             num_neurons_l2,  # Number of neurons
             dimensions=3,
             # Set intercept to 0.5
-            neuron_type=nengo.LIF(min_voltage=0, tau_ref=5e-2, tau_rc=1e-2),  # Specify type of neuron
-            max_rates=Uniform(1 / 6e-2, 1 / 6e-2),  # Set the maximum firing rate of the neuron 500Mhz
+            neuron_type=nengo.LIF(min_voltage=0, tau_ref=l2_ntr, tau_rc=l2_ntrc),  # Specify type of neuron
+            max_rates=Uniform(1 / (l2_ntr+sim.dt), 1 / (l2_ntr+sim.dt)),  # Set the maximum firing rate of the neuron 500Mhz
         )
 
         layer3 = nengo.Ensemble(
             num_neurons_l3,  # Number of neurons
             dimensions=3,
             # Set intercept to 0.5
-            neuron_type=nengo.LIF(min_voltage=0, tau_ref=5e-1, tau_rc=1e-1),  # Specify type of neuron
-            max_rates=Uniform(1 / 6e-1, 1 / 6e-1),  # Set the maximum firing rate of the neuron 500Mhz
+            neuron_type=nengo.LIF(min_voltage=0, tau_ref=l3_ntr, tau_rc=l3_ntrc),  # Specify type of neuron
+            max_rates=Uniform(1 / (l3_ntr+sim.dt), 1 / (l3_ntr+sim.dt)),  # Set the maximum firing rate of the neuron 500Mhz
         )
+        
 
 
     with model:
@@ -193,12 +262,14 @@ while not good:
 
     with model:
         nengo.Connection(input_signal, layer1, synapse=None,label="input signals to layer 1")
-        nengo.Connection(layer1, layer2, synapse=1e-1, label="layer 1 to layer2")
-        nengo.Connection(layer2, layer1, synapse=ts*1e-1, label="layer 2 to layer 1")
-        conn = nengo.Connection(layer2, layer3, synapse=1e-2, label="layer 2 to layer 3")
-        nengo.Connection(layer3, layer2, synapse=ts*1e-1, label="layer3 to layer2")
+        ff = Uniform(1e-1,1e-3).sample(1)[0]
+        fb = Uniform(1e-1,2e-3).sample(1)[0]
+        nengo.Connection(layer1, layer2, synapse=ff, label="layer 1 to layer2")
+        nengo.Connection(layer2, layer1, synapse=fb, label="layer 2 to layer 1")
+        conn = nengo.Connection(layer2, layer3, synapse=ff, label="layer 2 to layer 3")
+        nengo.Connection(layer3, layer2, synapse=fb, label="layer3 to layer2")
 
-    simT = 1
+    simT = label_length*sim.dt*2
     with model:
         input_probe = nengo.Probe(input_signal)  # The original input
         spikes = nengo.Probe(layer1.neurons)  # Raw spikes from each neuron
@@ -206,9 +277,9 @@ while not good:
         
         #voltage = nengo.Probe(layer1.neurons, 'voltage')
         # Spikes filtered by a 10ms post-synaptic filter
-        filteredl1 = nengo.Probe(layer1.neurons, 'voltage', synapse=3e-2)
-        filteredl2 = nengo.Probe(layer2.neurons, 'voltage', synapse=3e-2)
-        filteredl3 = nengo.Probe(layer3.neurons, 'voltage', synapse=3e-2)
+        filteredl1 = nengo.Probe(layer1.neurons, 'voltage', synapse=1e-3)
+        filteredl2 = nengo.Probe(layer2.neurons, 'voltage', synapse=1e-3)
+        filteredl3 = nengo.Probe(layer3.neurons, 'voltage', synapse=1e-3)
         
         # Setup probes
         p_keys = nengo.Probe(input_keys, synapse=None, label="p_keys")
@@ -230,84 +301,63 @@ while not good:
     # plt.title("Value Error During Training")
     # plt.plot(t[train], sim.data[p_error][train])
     # plt.show()
+    #plot_data()
 
-    plt.figure()
-    plt.title("Filtered L1 output")
-    # print(np.shape(sim.data[p_recall][test][0:,0:1]), np.shape(sim.data[p_values][test][0:,0:1]))
-    # plt.plot(t, sim.data[p_recall][0:,0:1])# - sim.data[p_values][0:,0:1])
-
-    plt.plot(t, sim.data[input_probe] + 2)
-    plt.plot(t, sim.data[p_keys] + 0, color="black")
-    print(np.shape(sim.data[filteredl1]))
-    plt.plot(t, sim.data[filteredl1][0:, 0:1] + 3, color="b")
-    plt.plot(t, sim.data[filteredl1][0:, 1:2] + 4, color="y")
-    plt.plot(t, sim.data[filteredl1][0:, 2:3] + 5, color="k")
-    plt.plot(t, sim.data[filteredl1][0:, 3:4] + 6, color="m")
-    plt.savefig('fig/3layersfeedbck_neuronsl1_4.png')
-    #    plt.plot(t, sim.data[filtered][0:, 4:5] + 7, color="r")
-    #    plt.plot(t, sim.data[filtered][0:, 5:6] + 8, color="g")
-    #    plt.plot(t, sim.data[filtered][0:, 6:7] + 9, color="#aabbcc")
-
-    plt.figure()
-    plt.title("Filtered L2 output")
-    # print(np.shape(sim.data[p_recall][test][0:,0:1]), np.shape(sim.data[p_values][test][0:,0:1]))
-    # plt.plot(t, sim.data[p_recall][0:,0:1])# - sim.data[p_values][0:,0:1])
-    plt.plot(t, sim.data[input_probe] + 2)
-    plt.plot(t, sim.data[p_keys] + 0, color="black")
-    print(np.shape(sim.data[filteredl2]))
-    plt.plot(t, sim.data[filteredl2][0:, 0:1] + 3, color="b")
-    plt.plot(t, sim.data[filteredl2][0:, 1:2] + 4, color="y")
-    plt.plot(t, sim.data[filteredl2][0:, 2:3] + 5, color="k")
-    plt.plot(t, sim.data[filteredl2][0:, 3:4] + 6, color="m")
-    plt.plot(t, sim.data[filteredl2][0:, 4:5] + 7, color="r")
-    plt.plot(t, sim.data[filteredl2][0:, 5:6] + 8, color="g")
-    plt.savefig('fig/3layersfeedbck_neuronsl2_6.png')
-
-    plt.figure()
-    plt.title("Filtered L3 output")
-
-    plt.plot(t[test], sim.data[p_keys][test] + 0, color="black")
-    plt.plot(t[test], sim.data[input_probe][test] + 2)
-    print(np.shape(sim.data[filteredl2]))
-    plt.plot(t[test], sim.data[filteredl2][test][0:, 0:1] + 3, color="b")
-    plt.plot(t[test], sim.data[filteredl2][test][0:, 1:2] + 4, color="y")
-    plt.savefig('fig/3layersfeedbck_neuronsl3_2_'+str(reseed)+'.png')
-
-    plt.clf()
-
-    plt.figure()
-    time_input_signal = t <= (pt*ts*(pulse_length+pulse_gap))
-    plt.title("single timesteps of input")
-    plt.plot(t[time_input_signal],sim.data[input_probe][time_input_signal][0: , 0:1], color="blue")
-    plt.plot(t[time_input_signal],sim.data[input_probe][time_input_signal][0: , 1:2]+2.1, color="green")
-    plt.plot(t[time_input_signal],sim.data[input_probe][time_input_signal][0: , 2:3] + 4.2 , color="orange")
-    plt.savefig('fig/inputTiming.png')
     i = 0
-
-    best_neuron_value = np.sum((sim.data[filteredl3][0:, 0:0 + 1]+1.0) - (sim.data[p_keys]*2.0))
-    print(best_neuron_value)
-    best_neuron_index = 0
+    best_neuron_valueA = np.abs(np.sum(sim.data[filteredl3][train][0:, 0:0 + 1] - (sim.data[p_keys][train])))
+    #print(best_neuron_valueA)
+    best_neuron_valueB = np.abs(np.sum(sim.data[filteredl3][test][0:, 0:0 + 1] - (sim.data[p_keys][test])))
+    #print(best_neuron_valueB)
+    best_neuron_indexA = 0
+    best_neuron_indexB = 0
     while i < num_neurons_l3:
-        print(i, "sim.data[filteredl3]+1", sim.data[filteredl3][0:, i:i + 1]+1.0 , "sim.data[p_keys]*2 ", (sim.data[p_keys]*2.0) )
-        for e in sim.data[p_keys]:
-            for el in e:
-                print (el)
-        sum = np.sum((sim.data[filteredl3][0:, i:i + 1]+1.0) - (sim.data[p_keys]*2.0))
-        # print(i, sum)
+        #print(i, "sim.data[filteredl3]", np.sum(sim.data[filteredl3][0:, i:i + 1]) , "sim.data[p_keys] ", np.sum(sim.data[p_keys]) )
+        sumA = np.abs(np.sum(sim.data[p_keys][train]) - np.sum(sim.data[filteredl3][train][0:, i:i + 1] ))
+        #print("train",i, sumA)
+        sumB = np.abs(np.sum(sim.data[p_keys][test]) - np.sum(sim.data[filteredl3][test][0:, i:i + 1] ))
+        #print("test",i, sumB)
 
-        if (sum < best_neuron_value):
-            best_neuron_index = i
-            best_neuron_value = sum
-        print(best_neuron_value, best_neuron_index, reseed)
+        if sumA < 20:
+            best_neuron_indexA = i
+            best_neuron_valueA = sumA
+            #best_neuron_indexB = i
+            #best_neuron_valueB = sumB
+
+        if sumB < 20:
+            #best_neuron_indexA = i
+            #best_neuron_valueA = sumA
+            best_neuron_indexB = i
+            best_neuron_valueB = sumB
+
+        print(best_neuron_valueA, best_neuron_indexA, best_neuron_valueB, best_neuron_indexB, reseed)
         i += 1
-    if (np.abs(best_neuron_value) < 20):
-        good = True
+
+    if (best_neuron_valueA < 20):
+        #print("here")
+        if (best_neuron_valueB < 20):
+         #   print("now")
+            if(best_neuron_indexA == best_neuron_indexB):
+          #      print("here")
+                #good = True
+                print("ntr=",ntr,
+                "\nntrc=",ntrc,
+                "\nl2_ntr=",l2_ntr,
+                "\nl2_ntrc=",l2_ntrc,
+                "\nl3_ntr=",l3_ntr,
+                "\nl3_ntrc=",l3_ntrc,
+                "\nff=",ff,
+                "\nfb=",fb)
+                print(best_neuron_valueA, best_neuron_indexA, best_neuron_valueB, best_neuron_indexB, reseed)
+                plot_data(str(reseed))
+            else:
+                reseed += 1
+        else:
+            reseed += 1
     else:
-        pt += 1e-3
-    #    reseed += 1
+        reseed += 1
 
     #preset_timing_plot()    
-    good = True
+    #good = True
 
 plt.figure()
 plt.title("Filtered output")
@@ -315,7 +365,8 @@ plt.title("Filtered output")
 # plt.plot(t, sim.data[p_recall][0:,0:1])# - sim.data[p_values][0:,0:1])
 plt.plot(t, sim.data[p_keys] + 0, color="g")
 plt.plot(t, sim.data[input_probe] + 2)
-plt.plot(t, sim.data[filteredl3][0:, best_neuron_index:best_neuron_index + 1] + 3, color="black")
+plt.plot(t, sim.data[filteredl3][0:, best_neuron_indexA:best_neuron_indexA + 1] + 3, color="black")
+plt.plot(t, sim.data[filteredl3][0:, best_neuron_indexB:best_neuron_indexB + 1] + 5, color="gray")
 #plt.savefig('fig/3layersfeedbck_best_neuron_index_l3.png')
 
 
@@ -346,6 +397,7 @@ plt.title("Learned Filtered output")
 plt.plot(t, sim.data[error_values],color="red")
 plt.plot(t, sim.data[p_keys] + 0, color="g")
 plt.plot(t, sim.data[input_probe] + 2)
-plt.plot(t, sim.data[filteredl3][0:, best_neuron_index:best_neuron_index + 1] + 3, color="black")
+plt.plot(t, sim.data[filteredl3][0:, best_neuron_indexA:best_neuron_indexA + 1] + 3, color="black")
+plt.plot(t, sim.data[filteredl3][0:, best_neuron_indexB:best_neuron_indexB + 1] + 5, color="gray")
 
 #plt.savefig('fig/3layersfeedbck_best_neuron_index_l3_learned.png')
