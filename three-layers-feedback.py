@@ -149,7 +149,7 @@ def phase_automata_fractional_pulse(driving_symbol='0', number_of_symbols=3, id_
     return code, ending_state
 
 
-reseed = 9166#8 #91521 #91427 #91377 #91362 #91332 #91323 #91280 #91274 # 91264 # 91254  # 91273
+reseed = 11524#9166#8 #91521 #91427 #91377 #91362 #91332 #91323 #91280 #91274 # 91264 # 91254  # 91273
 good = False
 number_of_samples = 2
 ts = 6  # number of possible transitions to hold a driving symbol constant for.
@@ -262,8 +262,8 @@ while not good:
 
     with model:
         nengo.Connection(input_signal, layer1, synapse=None,label="input signals to layer 1")
-        ff = Uniform(1e-1,1e-3).sample(1)[0]
-        fb = Uniform(1e-1,2e-3).sample(1)[0]
+        ff = Uniform(2e-1,2e-2).sample(1)[0]
+        fb = Uniform(2e-1,2e-2).sample(1)[0]
         nengo.Connection(layer1, layer2, synapse=ff, label="layer 1 to layer2")
         nengo.Connection(layer2, layer1, synapse=fb, label="layer 2 to layer 1")
         conn = nengo.Connection(layer2, layer3, synapse=ff, label="layer 2 to layer 3")
