@@ -28,8 +28,8 @@ def preset_timing_plot():
     performance[0] = sim.dt
     performance[1] = (pt*pulse_length)
     performance[2] = (pt*pulse_gap)
-    performance[3] = ts*pt
-    performance[4] = label_length*pt
+    performance[3] = ts*(pt*(pulse_gap+pulse_length))
+    performance[4] = label_length*(pt*(pulse_gap+pulse_length))
     performance[5] = layer1.neuron_type.tau_rc
     performance[6] = layer1.neuron_type.tau_ref
     performance[7] = layer2.neuron_type.tau_rc
@@ -356,7 +356,7 @@ while not good:
     else:
         reseed += 1
 
-    #preset_timing_plot()    
+    preset_timing_plot()    
     #good = True
 
 plt.figure()
