@@ -28,7 +28,7 @@ def preset_timing_plot():
     performance[0] = sim.dt
     performance[1] = (pt*pulse_length)
     performance[2] = (pt*pulse_gap)
-    performance[3] = ts*pt
+    performance[3] = ts*(pt*(pulse_gap+pulse_length))
     performance[4] = label_length*pt
     performance[5] = layer1.neuron_type.tau_rc
     performance[6] = layer1.neuron_type.tau_ref
@@ -155,7 +155,7 @@ good = False
 number_of_samples = 2
 ts = 6  # number of possible transitions to hold a driving symbol constant for.
 pb = False
-pt = 3e-3 # seconds to present each step of input
+pt = 1e-3 # seconds to present each step of input
 pulse_length = 2
 pulse_gap = 0
 label_length = ts * 3 * (pulse_length+pulse_gap)# In Timesteps, multiply by dt to get actual length of time
@@ -341,9 +341,7 @@ while not good:
 
         print(best_neuron_valueA, best_neuron_indexA, best_neuron_valueB, best_neuron_indexB, reseed)
         i += 1
-
     plot_data(str(reseed))
-    good = True
     if (best_neuron_valueA < 20):
         #print("here")
         if (best_neuron_valueB < 20):
@@ -368,8 +366,9 @@ while not good:
     else:
         reseed += 1
 
-    #preset_timing_plot()    
-    #good = True
+    preset_timing_plot()
+    
+    good = True
 
 plt.figure()
 plt.title("Filtered output")
