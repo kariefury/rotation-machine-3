@@ -234,14 +234,14 @@ while not good:
         # l3_ntr= 0.008004251267465179
         # l3_ntrc= 0.0015320812730265365
         # Seed 13544
-        ntr= 0.006091425462138759
-        ntrc= 0.0037420741870769804
-        l2_ntr= 0.006238565394075678
-        l2_ntrc= 0.04990662443768488
-        l3_ntr= 0.020844749509316224
-        l3_ntrc= 0.005085923595315616
-        ff= 0.07203125488564155
-        fb= 0.10373363244164732
+        # ntr= 0.006091425462138759
+        # ntrc= 0.0037420741870769804
+        # l2_ntr= 0.006238565394075678
+        # l2_ntrc= 0.04990662443768488
+        # l3_ntr= 0.020844749509316224
+        # l3_ntrc= 0.005085923595315616
+        # ff= 0.07203125488564155
+        # fb= 0.10373363244164732
         layer1 = nengo.Ensemble(
             num_neurons_l1,  # Number of neurons
             dimensions=3,  # each neuron is connected to all (3) input channels.
@@ -341,7 +341,6 @@ while not good:
 
         print(best_neuron_valueA, best_neuron_indexA, best_neuron_valueB, best_neuron_indexB, reseed)
         i += 1
-    plot_data(str(reseed))
     if (best_neuron_valueA < 20):
         #print("here")
         if (best_neuron_valueB < 20):
@@ -366,9 +365,9 @@ while not good:
     else:
         reseed += 1
 
-    preset_timing_plot()
+    #preset_timing_plot()
     
-    good = True
+    #good = True
 
 plt.figure()
 plt.title("Filtered output")

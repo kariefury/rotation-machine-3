@@ -1,11 +1,16 @@
+import matplotlib as mpl
+print(mpl.get_backend())
+
 import matplotlib.pyplot as plt
 import numpy as np
-
+mpl.use('agg')
 import nengo
 from nengo.dists import Uniform
 from nengo.utils.matplotlib import rasterplot
 from nengo.processes import PresentInput
 from nengo.utils.ensemble import tuning_curves
+from numpy.random import RandomState
+
 
 def preset_timing_plot():
     print("sim.dt",sim.dt)
@@ -47,6 +52,7 @@ def preset_timing_plot():
     plt.savefig('fig/preset_timing_parameters/preset_timing_parmeters.png')
 
 def plot_data(q,neuronid,b):
+    print("plotting")
     plt.figure()
     plt.title("Filtered L1 output")
 
@@ -132,7 +138,7 @@ number_of_samples = 2
 ts = 6  # number of possible transitions to hold a driving symbol constant for.
 pb = False
 pt = 1e-3 # seconds to present each step of input
-pulse_length = 40
+pulse_length = 10
 pulse_gap = 5
 label_length = ts * 3 * (pulse_length+pulse_gap)# In Timesteps, multiply by dt to get actual length of time
 padded_zeros = np.zeros((3, ts * 2 * (pulse_length+pulse_gap)), dtype=float)
@@ -151,7 +157,7 @@ labels1 = np.ones((label_length, 1), dtype=float)
 bothLabels = np.concatenate((labels0, labels1), axis=0)
 bothPatterns = np.concatenate((threeChannels0, threeChannels1), axis=1)
 
-bitstring = "0111100001010000000111111101010101010011001100011100101010000111100000000000000000000000000000000000000000000000000000000000000000"
+bitstring = "10110011100001010000000111111101010101010011001100011100101010000111100000000000000000000000000000000000000000000000000000000000000000"
 plt.figure()
 plt.title("Input Pattern and Label Example ProbTran:"+str(pb)+" PaddedZeros:True")
 t = np.arange(ts*(pulse_gap+pulse_length)*3*2)
@@ -186,21 +192,28 @@ while i < number_of_samples:
 tC = bothPatterns.transpose((1, 0))
 labels = bothLabels
 
-
+sweep = 0
+ntr_sweep = np.arange(pt, 9e-2, pt,dtype=float)
+ntr = ntr_sweep[10]#Uniform(9e-2,1e-3).sample(n=100,d=None,rng=RandomState(reseed))[0]
+ntrc_sweep = np.arange(pt, 9e-2, pt,dtype=float)
+ntrc = ntrc_sweep[10]
+l2_ntr_sweep = np.arange(pt, 9e-2, pt,dtype=float)
+l2_ntr = l2_ntr_sweep[40]#Uniform(5e-2,1e-3).sample(n=1,d=None,rng=RandomState(reseed))[0]
+l2_ntrc_sweep = np.arange(pt, 9e-2, pt,dtype=float)
+l2_ntrc = l2_ntrc_sweep[10]#Uniform(4e-2,1e-3).sample(n=1,d=None,rng=RandomState(reseed))[0]
+ff_sweep = np.arange(pt, 9e-2, pt,dtype=float)
+ff = ff_sweep[60]#Uniform(1e-2,1e-3).sample(n=1,d=None,rng=RandomState(reseed))[0]
+fb_sweep = np.arange(pt, 9e-2, pt,dtype=float)
+fb = fb_sweep[0]#Uniform(2e-2,1e-3).sample(n=1,d=None,rng=RandomState(reseed))[0]
 while not good:
     model = nengo.Network(label='Two Layers with feedback', seed=reseed)
     sim = nengo.Simulator(model)
     pt = sim.dt
-    num_neurons_l1 = 40
-    num_neurons_l2 = 60
+    num_neurons_l1 = 4
+    num_neurons_l2 = 6
     with model:
-        ntr = Uniform(9e-2,1e-3).sample(1)[0]
-        ntrc = Uniform(9e-2,2e-3).sample(1)[0]
-        l2_ntr = Uniform(5e-2,1e-3).sample(1)[0]
-        l2_ntrc = Uniform(4e-2,1e-3).sample(1)[0]
-        ff = Uniform(1e-2,1e-3).sample(1)[0]
-        fb = Uniform(2e-2,1e-3).sample(1)[0]
-
+        print("l2_ntr",l2_ntr)
+        fb = fb_sweep[sweep]
         layer1 = nengo.Ensemble(
             num_neurons_l1,  # Number of neurons
             dimensions=3,  # each neuron is connected to all (3) input channels.
@@ -275,26 +288,26 @@ while not good:
 
         print(best_neuron_valueA, best_neuron_indexA, best_neuron_valueB, best_neuron_indexB, reseed)
         i += 1
-    if (best_neuron_valueA < 200):
+        target = np.sum(sim.data[p_keys][test])
+        print("Target", target)
+    if (best_neuron_valueA < target):
         #print("here")
-        if (best_neuron_valueB < 600):
-         #   print("now")
-            
+        if (best_neuron_valueB < target):
+            print("now")
+             
           #      print("here")
                 #good = True
-            print("ntr=",ntr,
-            "\nntrc=",ntrc,
-            "\nl2_ntr=",l2_ntr,
-            "\nl2_ntrc=",l2_ntrc,
-            "\nff=",ff,
-            "\nfb=",fb)
+            xls = str(l2_ntrc)
+            if len(xls) > 8:
+                xls = xls[0:8]
+            restart_conditions = "ntr="+str(ntr)+"\nntrc="+str(ntrc)+"\nl2_ntr="+str(l2_ntr)+"\nl2_ntrc="+str(l2_ntrc)+"\nff="+str(ff)+"\nfb="+str(fb)+"\nreseed="+str(reseed)
             print(best_neuron_valueA, best_neuron_indexA, best_neuron_valueB, best_neuron_indexB, reseed)
-            plot_data(str(reseed),best_neuron_indexA,best_neuron_indexB)
-        else:
-            reseed += 1
-    else:
-        reseed += 1
-
+            plot_data(str(reseed)+"_fb_"+str(sweep),best_neuron_indexA,best_neuron_indexB)
+            with open("fig/two-layers-feedback/"+str(reseed)+"_fb_"+str(sweep)+".txt","w") as f:
+                f.write(restart_conditions)
+                f.close()
+    #reseed += 1
     #preset_timing_plot()
-    
-    #good = True
+    sweep += 1
+    if sweep == 99:
+        good = True
